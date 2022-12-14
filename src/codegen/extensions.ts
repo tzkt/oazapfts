@@ -89,11 +89,12 @@ type SchemaParserExtensionHelpers = {
  */
 export type SchemaParserExtension = (
   s: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject | undefined,
+  name: string | undefined,
   helpers: SchemaParserExtensionHelpers & typeof defaultHelpers
 ) => ts.TypeNode | undefined;
 
 type ParameterParserExtensionHelpers = {
-  defaultParameterTypeParser: ApiGenerator["getNonExtendedMethodParameter"];
+  defaultParameterTypeParser: ApiGenerator["getTypeFromDefaultParameter"];
 };
 
 /**
@@ -107,7 +108,7 @@ export type ParameterParserExtension = (
   helpers: ParameterParserExtensionHelpers & typeof defaultHelpers
 ) => ts.TypeNode | undefined;
 
-type QueryStringParserExtensionHelpers = {
+type ResolveHelpers = {
   defaultSchemaResolver: ApiGenerator["resolve"];
 };
 
@@ -118,7 +119,7 @@ type QueryStringParserExtensionHelpers = {
  */
 export type QueryStringParserExtension = (
   p: OpenAPIV3.ParameterObject,
-  helpers: QueryStringParserExtensionHelpers & typeof defaultHelpers
+  helpers: ResolveHelpers & typeof defaultHelpers
 ) => string | undefined;
 
 /**

@@ -4,13 +4,13 @@ import { encode, delimited, encodeReserved } from "./util";
  * Join params using an ampersand and prepends a questionmark if not empty.
  */
 export function query(...params: string[]) {
-  const s = params.join("&");
+  const s = params.filter(Boolean).join("&");
   return s && `?${s}`;
 }
 
 /**
  * Serializes nested objects according to the `deepObject` style specified in
- * https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#style-values
+ * https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#style-values
  */
 export function deep(
   params: Record<string, any>,
@@ -40,7 +40,7 @@ export function deep(
  * Property values of type array or object generate separate parameters
  * for each value of the array, or key-value-pair of the map.
  * For other types of properties this property has no effect.
- * See https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#encoding-object
+ * See https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#encoding-object
  */
 export function explode(
   params: Record<string, any>,
@@ -57,6 +57,20 @@ export function explode(
         return explode(value, encoders);
       }
       return q`${name}=${value}`;
+    })
+    .join("&");
+}
+
+export function json(
+  params: Record<string, any>,
+  encoders = encodeReserved
+): string {
+  const q = encode(encoders);
+  return Object.entries(params)
+    .filter(([, value]) => value !== undefined)
+    .map(([name, value]) => {
+      const v = JSON.stringify(value);
+      return q`${name}=${v}`;
     })
     .join("&");
 }

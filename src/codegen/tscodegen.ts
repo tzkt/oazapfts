@@ -1,17 +1,6 @@
 import fs from "fs";
 import ts, { factory } from "typescript";
 
-ts.parseIsolatedEntityName;
-type KeywordTypeName =
-  | "any"
-  | "number"
-  | "object"
-  | "string"
-  | "boolean"
-  | "undefined"
-  | "unknown"
-  | "null";
-
 export const questionToken = factory.createToken(ts.SyntaxKind.QuestionToken);
 
 export function createQuestionToken(token?: boolean | ts.QuestionToken) {
@@ -20,75 +9,64 @@ export function createQuestionToken(token?: boolean | ts.QuestionToken) {
   return token;
 }
 
-export function createKeywordType(
-  type: KeywordTypeName
-): ts.KeywordTypeNode | ts.LiteralTypeNode | ts.TypeReferenceNode {
-  switch (type) {
-    case "any":
-      return factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword);
-    case "number":
-      return factory.createKeywordTypeNode(ts.SyntaxKind.NumberKeyword);
-    case "object":
-      return factory.createTypeReferenceNode(
-        factory.createIdentifier("Record"),
-        [createKeywordType("string"), createKeywordType("unknown")]
-      );
-    case "string":
-      return factory.createKeywordTypeNode(ts.SyntaxKind.StringKeyword);
-    case "boolean":
-      return factory.createKeywordTypeNode(ts.SyntaxKind.BooleanKeyword);
-    case "undefined":
-      return factory.createKeywordTypeNode(ts.SyntaxKind.UndefinedKeyword);
-    case "unknown":
-      return factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword);
-    case "null":
-      return factory.createLiteralTypeNode(
-        ts.factory.createToken(ts.SyntaxKind.NullKeyword)
-      );
-  }
-}
-
-export const keywordType: {
-  [type: string]:
-    | ts.KeywordTypeNode
-    | ts.LiteralTypeNode
-    | ts.TypeReferenceNode;
-} = {
+export const keywordType = {
   any: factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword),
   number: factory.createKeywordTypeNode(ts.SyntaxKind.NumberKeyword),
   object: factory.createTypeReferenceNode(factory.createIdentifier("Record"), [
-    createKeywordType("string"),
-    createKeywordType("unknown"),
+    factory.createKeywordTypeNode(ts.SyntaxKind.StringKeyword),
+    factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword),
   ]),
   string: factory.createKeywordTypeNode(ts.SyntaxKind.StringKeyword),
   boolean: factory.createKeywordTypeNode(ts.SyntaxKind.BooleanKeyword),
   undefined: factory.createKeywordTypeNode(ts.SyntaxKind.UndefinedKeyword),
   unknown: factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword),
-  null: factory.createLiteralTypeNode(
-    ts.factory.createToken(ts.SyntaxKind.NullKeyword)
-  ),
-};
+  void: factory.createKeywordTypeNode(ts.SyntaxKind.VoidKeyword),
+  null: factory.createLiteralTypeNode(factory.createNull()),
+} as const;
+
+type KeywordTypeName = keyof typeof keywordType;
+
+export function createKeywordType(type: KeywordTypeName) {
+  return keywordType[type];
+}
 
 export const modifier = {
   async: factory.createModifier(ts.SyntaxKind.AsyncKeyword),
   export: factory.createModifier(ts.SyntaxKind.ExportKeyword),
 };
 
+export function createLiteral(v: string | boolean | number) {
+  switch (typeof v) {
+    case "string":
+      return factory.createStringLiteral(v);
+    case "boolean":
+      return v ? factory.createTrue() : factory.createFalse();
+    case "number":
+      return factory.createNumericLiteral(String(v));
+  }
+}
+
+export function createEnumTypeNode(values: Array<string | boolean | number>) {
+  const types = values.map((v) =>
+    v === null
+      ? keywordType.null
+      : factory.createLiteralTypeNode(createLiteral(v))
+  );
+  return types.length > 1 ? factory.createUnionTypeNode(types) : types[0];
+}
+
 export function createTypeAliasDeclaration({
-  decorators,
   modifiers,
   name,
   typeParameters,
   type,
 }: {
-  decorators?: Array<ts.Decorator>;
   modifiers?: Array<ts.Modifier>;
   name: string | ts.Identifier;
   typeParameters?: Array<ts.TypeParameterDeclaration>;
   type: ts.TypeNode;
 }) {
   return factory.createTypeAliasDeclaration(
-    decorators,
     modifiers,
     name,
     typeParameters,
@@ -180,13 +158,11 @@ export function createArrowFunction(
 export function createFunctionDeclaration(
   name: string | ts.Identifier | undefined,
   {
-    decorators,
     modifiers,
     asteriskToken,
     typeParameters,
     type,
   }: {
-    decorators?: ts.Decorator[];
     modifiers?: ts.Modifier[];
     asteriskToken?: ts.AsteriskToken;
     typeParameters?: ts.TypeParameterDeclaration[];
@@ -196,7 +172,6 @@ export function createFunctionDeclaration(
   body?: ts.Block
 ): ts.FunctionDeclaration {
   return factory.createFunctionDeclaration(
-    decorators,
     modifiers,
     asteriskToken,
     name,
@@ -259,14 +234,12 @@ export function createMethod(
     | ts.NumericLiteral
     | ts.ComputedPropertyName,
   {
-    decorators,
     modifiers,
     asteriskToken,
     questionToken,
     typeParameters,
     type,
   }: {
-    decorators?: ts.Decorator[];
     modifiers?: ts.Modifier[];
     asteriskToken?: ts.AsteriskToken;
     questionToken?: ts.QuestionToken | boolean;
@@ -277,7 +250,6 @@ export function createMethod(
   body?: ts.Block
 ): ts.MethodDeclaration {
   return factory.createMethodDeclaration(
-    decorators,
     modifiers,
     asteriskToken,
     name,
@@ -292,14 +264,12 @@ export function createMethod(
 export function createParameter(
   name: string | ts.BindingName,
   {
-    decorators,
     modifiers,
     dotDotDotToken,
     questionToken,
     type,
     initializer,
   }: {
-    decorators?: Array<ts.Decorator>;
     modifiers?: Array<ts.Modifier>;
     dotDotDotToken?: ts.DotDotDotToken;
     questionToken?: ts.QuestionToken | boolean;
@@ -308,7 +278,6 @@ export function createParameter(
   }
 ): ts.ParameterDeclaration {
   return factory.createParameterDeclaration(
-    decorators,
     modifiers,
     dotDotDotToken,
     name,
@@ -349,19 +318,16 @@ export function createPropertySignature({
 export function createIndexSignature(
   type: ts.TypeNode,
   {
-    decorators,
     modifiers,
     indexName = "key",
     indexType = keywordType.string,
   }: {
     indexName?: string;
     indexType?: ts.TypeNode;
-    decorators?: Array<ts.Decorator>;
     modifiers?: Array<ts.Modifier>;
   } = {}
 ) {
   return factory.createIndexSignature(
-    decorators,
     modifiers,
     [createParameter(indexName, { type: indexType })],
     type

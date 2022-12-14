@@ -3,18 +3,24 @@ import { ApiResponse } from "./runtime";
 /**
  * Type to access a response's data property for a given status.
  */
-type DataType<T extends ApiResponse, S extends number> = T extends { status: S }
+export type DataType<T extends ApiResponse, S extends number> = T extends {
+  status: S;
+}
   ? T["data"]
   : never;
 
 /**
  * Object with methods to handle possible status codes of an ApiResponse.
  */
-type ResponseHandler<T extends ApiResponse> = {
-  [P in T["status"]]: (res: DataType<T, P>) => any;
+export type ResponseHandler<T extends ApiResponse> = {
+  [P in T["status"]]?: (res: DataType<T, P>) => any;
 } & {
   default?: (status: number, data: any) => any;
 };
+
+export type FunctionReturnType<T> = T extends (args: any[]) => any
+  ? ReturnType<T>
+  : never;
 
 /**
  * Utility function to handle different status codes.
@@ -29,7 +35,7 @@ type ResponseHandler<T extends ApiResponse> = {
 export async function handle<
   T extends ApiResponse,
   H extends ResponseHandler<T>
->(promise: Promise<T>, handler: H): Promise<ReturnType<H[keyof H]>> {
+>(promise: Promise<T>, handler: H): Promise<FunctionReturnType<H[keyof H]>> {
   const { status, data } = await promise;
   const statusHandler = (handler as any)[status];
   if (statusHandler) return statusHandler(data);
@@ -37,10 +43,10 @@ export async function handle<
   throw new HttpError(status, data);
 }
 
-const SUCCESS_CODES = [200, 201, 202, 204] as const;
-type SuccessCodes = typeof SUCCESS_CODES[number];
+export const SUCCESS_CODES = [200, 201, 202, 204] as const;
+export type SuccessCodes = typeof SUCCESS_CODES[number];
 
-type SuccessResponse<T extends ApiResponse> = DataType<T, SuccessCodes>;
+export type SuccessResponse<T extends ApiResponse> = DataType<T, SuccessCodes>;
 
 /**
  * Utility function to directly return any successful response

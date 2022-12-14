@@ -1,8 +1,4 @@
-import generate, { getOperationName } from "./generate";
-import { printAst } from "./index";
-import SwaggerParser from "@apidevtools/swagger-parser";
-import { OpenAPIV3 } from "openapi-types";
-import ApiGenerator from "./generate";
+import { getOperationName, isJsonMimeType, isMimeType } from "./generate";
 
 describe("getOperationName", () => {
   it("should use the id", () => {
@@ -20,40 +16,21 @@ describe("getOperationName", () => {
   });
 });
 
-describe("generate", () => {
-  let artefact: string;
-  let spec: OpenAPIV3.Document;
-
-  beforeAll(async () => {
-    spec = (await SwaggerParser.bundle(
-      __dirname + "/../../demo/petstore.json"
-    )) as any;
+describe("content types", () => {
+  it("should identify strings that look like mime types", () => {
+    expect(isMimeType("*/*")).toBe(true);
+    expect(isMimeType("foo/bar")).toBe(true);
+    expect(isMimeType("foo/bar+baz")).toBe(true);
+    expect(isMimeType(undefined)).toBe(false);
+    expect(isMimeType("")).toBe(false);
+    expect(isMimeType("foo")).toBe(false);
+    expect(isMimeType("foo/bar/boo")).toBe(false);
   });
 
-  it("should generate an api", async () => {
-    artefact = printAst(new ApiGenerator(spec).generateApi());
-  });
-
-  /* https://github.com/cotype/build-client/issues/5 */
-  it("should generate same api a second time", async () => {
-    expect(printAst(new ApiGenerator(spec).generateApi())).toBe(artefact);
-  });
-});
-
-describe("generate with blob download", () => {
-  let spec: OpenAPIV3.Document;
-
-  beforeAll(async () => {
-    spec = (await SwaggerParser.bundle(
-      __dirname + "/../../demo/binary.json"
-    )) as any;
-  });
-
-  it("should generate an api using fetchBlob", async () => {
-    const artefact = printAst(new ApiGenerator(spec).generateApi());
-    const oneLine = artefact.replace(/\s+/g, " ");
-    expect(oneLine).toContain(
-      "return oazapfts.fetchBlob<{ status: 200; data: Blob; }>(`/file/${fileId}/download`, { ...opts });"
-    );
+  it("should treat some content types as json", () => {
+    expect(isJsonMimeType("application/json")).toBe(true);
+    expect(isJsonMimeType("application/json+foo")).toBe(true);
+    expect(isJsonMimeType("*/*")).toBe(true);
+    expect(isJsonMimeType("text/plain")).toBe(false);
   });
 });

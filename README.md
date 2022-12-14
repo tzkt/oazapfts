@@ -1,5 +1,7 @@
 # 🍻 oazapfts
 
+[![CI](https://github.com/cellular/oazapfts/actions/workflows/ci.yml/badge.svg)](https://github.com/cellular/oazapfts/actions/workflows/ci.yml)
+
 Generate TypeScript clients to tap into OpenAPI servers.
 
 This is a fork of [oazapfts](https://github.com/cellular/oazapfts) to allow for API generation from [tzkt](https://tzkt.io)-specific swagger.
@@ -24,6 +26,8 @@ npx oazapfts <spec> [filename]
 Options:
 --exclude, -e tag to exclude
 --include, -i tag to include
+--optimistic
+--useEnumType
 ```
 
 Where `<spec>` is the URL or local path of an OpenAPI or Swagger spec (in either json or yml) and `<filename>` is the location of the `.ts` file to be generated. If the filename is omitted, the code is written to stdout.
@@ -94,7 +98,8 @@ This is the most low-level extension type, allowing you to override, how any sch
 
 ```ts
 type SchemaParserExtension = (
-  s: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject | undefined,
+  schema?: SchemaObject | OpenAPIV3.ReferenceObject,
+  name?: string
   helpers: SchemaParserExtensionHelpers & typeof defaultHelpers
 ) => ts.TypeNode | undefined;
 ```
@@ -111,7 +116,11 @@ import {
 } from "@tzkt/oazapfts/lib/codegen/extensions";
 import { factory } from "typescript";
 
-const myCustomSchemaParserExtension: SchemaParserExtension = (s, helpers) => {
+const myCustomSchemaParserExtension: SchemaParserExtension = (
+  s,
+  name,
+  helpers
+) => {
   if (!s || helpers.isReference(s)) return;
 
   const isSchemaExtended = !!s["x-my-custom-schema"];

@@ -1,10 +1,11 @@
 {
   "compilerOptions": {
     "target": "esnext",
+    "module": "commonjs",
+    "lib": ["esnext", "dom"],
+    "moduleResolution": "node",
     "sourceMap": true,
     "declaration": true,
-    "lib": ["es2015", "dom"],
-    "module": "commonjs",
     "strict": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
@@ -14,7 +15,7 @@
     "noUnusedLocals": false,
     "baseUrl": ".",
     "paths": {
-      "oazapfts/lib/*": ["../lib/*"]
+      "@tzkt/oazapfts/lib/*": ["../lib/*"]
     }
   }
 }

@@ -1,9 +1,10 @@
 import { Config } from "@jest/types";
 
 const config: Config.InitialOptions = {
-  preset: "ts-jest",
+  preset: "ts-jest/presets/default-esm",
+  testEnvironment: "node",
   moduleNameMapper: {
-    "^oazapfts/lib/(.+)$": "<rootDir>/../src/$1",
+    "^@tzkt/oazapfts/lib/(.+)$": "<rootDir>/../src/$1",
   },
   restoreMocks: true,
 };

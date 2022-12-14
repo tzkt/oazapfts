@@ -27,9 +27,9 @@ export type Pet = {
   name: string;
   photoUrls: string[];
   tags?: Tag[];
-  status?: "available" | "pending" | "sold";
+  status?: Status;
   animal?: true;
-  size?: "P" | "M" | "G";
+  size?: Size;
 };
 export type ApiResponse = {
   code?: number;
@@ -41,7 +41,7 @@ export type Order = {
   petId?: number;
   quantity?: number;
   shipDate?: string;
-  status?: "placed" | "approved" | "delivered";
+  status?: Status2;
   complete?: boolean;
 };
 export type User = {
@@ -53,7 +53,7 @@ export type User = {
   password?: string;
   phone?: string;
   userStatus?: number;
-  category?: "rich" | "wealthy" | "poor";
+  category?: Category2;
 };
 export type Schema = string;
 export type Schema2 = number;
@@ -580,4 +580,24 @@ export function issue330(body?: string, opts?: Oazapfts.RequestOpts) {
       body,
     })
   );
+}
+export enum Status {
+  Available = "Available",
+  Pending = "Pending",
+  Sold = "Sold",
+}
+export enum Size {
+  P = 0,
+  M = 1,
+  G = 2,
+}
+export enum Status2 {
+  Placed = "Placed",
+  Approved = "Approved",
+  Delivered = "Delivered",
+}
+export enum Category2 {
+  Rich = "Rich",
+  Wealthy = "Wealthy",
+  Poor = "Poor",
 }

@@ -6,18 +6,24 @@ export type RequestOpts = {
   baseUrl?: string;
   fetch?: typeof fetch;
   formDataConstructor?: new () => FormData;
-  headers?: Record<string, string | undefined>;
+  headers?: Record<string, string | number | boolean | undefined>;
 } & Omit<RequestInit, "body" | "headers">;
 
 type FetchRequestOpts = RequestOpts & {
-  body?: string | FormData;
+  body?: string | FormData | Blob;
 };
 
 type JsonRequestOpts = RequestOpts & {
-  body?: object;
+  body?: any;
+};
+
+type FormRequestOpts = RequestOpts & {
+  body?: Record<string, any>;
 };
 
 export type ApiResponse = { status: number; data?: any };
+
+export type WithHeaders<T extends ApiResponse> = T & { headers: Headers };
 
 type MultipartRequestOpts = RequestOpts & {
   body?: Record<string, string | Blob | undefined | any>;
@@ -33,6 +39,7 @@ export function runtime(defaults: RequestOpts) {
 
     return {
       status: res.status,
+      headers: res.headers,
       contentType: res.headers.get("content-type"),
       data,
     };
@@ -42,24 +49,25 @@ export function runtime(defaults: RequestOpts) {
     url: string,
     req: FetchRequestOpts = {}
   ) {
-    const { status, contentType, data } = await fetchText(url, {
+    const { status, headers, contentType, data } = await fetchText(url, {
       ...req,
       headers: {
-        ...req.headers,
         Accept: "application/json",
+        ...req.headers,
       },
     });
 
-    const jsonTypes = ["application/json", "application/hal+json"];
-    const isJson = contentType
-      ? jsonTypes.some((mimeType) => contentType.includes(mimeType))
-      : false;
+    const isJson = contentType ? contentType.includes("json") : false;
 
     if (isJson) {
-      return { status, data: data ? JSON.parse(data) : null } as T;
+      return {
+        status,
+        headers,
+        data: data ? JSON.parse(data) : null,
+      } as WithHeaders<T>;
     }
 
-    return { status, data } as T;
+    return { status, headers, data } as WithHeaders<T>;
   }
 
   async function fetchBlob<T extends ApiResponse>(
@@ -71,7 +79,7 @@ export function runtime(defaults: RequestOpts) {
     try {
       data = await res.blob();
     } catch (err) {}
-    return { status: res.status, data } as T;
+    return { status: res.status, headers: res.headers, data } as WithHeaders<T>;
   }
 
   async function doFetch(url: string, req: FetchRequestOpts = {}) {
@@ -101,7 +109,7 @@ export function runtime(defaults: RequestOpts) {
     json({ body, headers, ...req }: JsonRequestOpts) {
       return {
         ...req,
-        ...(body && { body: JSON.stringify(body) }),
+        ...(body != null && { body: JSON.stringify(body) }),
         headers: {
           ...headers,
           "Content-Type": "application/json",
@@ -109,10 +117,10 @@ export function runtime(defaults: RequestOpts) {
       };
     },
 
-    form({ body, headers, ...req }: JsonRequestOpts) {
+    form({ body, headers, ...req }: FormRequestOpts) {
       return {
         ...req,
-        ...(body && { body: qs.form(body) }),
+        ...(body != null && { body: qs.form(body) }),
         headers: {
           ...headers,
           "Content-Type": "application/x-www-form-urlencoded",
@@ -121,7 +129,7 @@ export function runtime(defaults: RequestOpts) {
     },
 
     multipart({ body, ...req }: MultipartRequestOpts) {
-      if (!body) return req;
+      if (body == null) return req;
       const data = new (defaults.formDataConstructor ||
         req.formDataConstructor ||
         FormData)();

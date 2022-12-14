@@ -1,12 +1,12 @@
 {
   "compilerOptions": {
     "outDir": "lib",
-    "rootDir": "src",
-    "target": "es2015",
+    "target": "esnext",
+    "module": "CommonJS",
+    "lib": ["esnext", "dom"],
+    "moduleResolution": "node",
     "sourceMap": true,
     "declaration": true,
-    "lib": ["es2015", "dom"],
-    "module": "commonjs",
     "strict": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
@@ -15,6 +15,12 @@
     "forceConsistentCasingInFileNames": true,
     "noUnusedLocals": false
   },
-  "exclude": ["demo", "lib", "src/codegen/ApiStub.ts", "jest.config.ts"],
+  "exclude": [
+    "node_modules/**",
+    "demo",
+    "lib",
+    "src/codegen/ApiStub.ts",
+    "jest.config.ts"
+  ],
   "include": ["src/**/*.ts"]
 }
