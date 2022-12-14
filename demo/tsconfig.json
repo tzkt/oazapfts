@@ -15,7 +15,7 @@
     "noUnusedLocals": false,
     "baseUrl": ".",
     "paths": {
-      "@tzkt/oazapfts/lib/*": ["../lib/*"]
+      "@tzkt/oazapfts/*": ["../lib/*"]
     }
   }
 }

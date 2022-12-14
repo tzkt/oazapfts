@@ -4,7 +4,7 @@ const config: Config.InitialOptions = {
   preset: "ts-jest/presets/default-esm",
   testEnvironment: "node",
   moduleNameMapper: {
-    "^@tzkt/oazapfts/lib/(.+)$": "<rootDir>/../src/$1",
+    "^@tzkt/oazapfts/(.+)$": "<rootDir>/../src/$1",
   },
   restoreMocks: true,
 };

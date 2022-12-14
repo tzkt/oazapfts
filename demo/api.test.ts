@@ -1,6 +1,6 @@
 import { Response, FormData, Blob } from "node-fetch";
 import fetch from "node-fetch";
-import { handle, ok, okify, optimistic } from "@tzkt/oazapfts/lib/index";
+import { handle, ok, okify, optimistic } from "@tzkt/oazapfts/index";
 import * as api from "./api";
 import * as optimisticApi from "./optimisticApi";
 

@@ -26,7 +26,7 @@ async function checkForTypeErrors(source: string) {
       noEmit: true,
       target: ScriptTarget.ESNext,
       paths: {
-        "@tzkt/oazapfts/lib/*": [__dirname + "/../../lib/*"],
+        "@tzkt/oazapfts/*": [__dirname + "/../../lib/*"],
       },
     },
   });

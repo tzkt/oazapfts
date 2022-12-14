@@ -62,7 +62,7 @@ import {
   SchemaParserExtension,
   ParameterParserExtension,
   QueryStringParserExtension,
-} from "@tzkt/oazapfts/lib/codegen/extensions";
+} from "@tzkt/oazapfts/codegen/extensions";
 ```
 
 ### Get on to writing your extensions
@@ -75,7 +75,7 @@ Every extension is essentially an array of methods that you `export default` fro
 
 ```ts
 // oazapfts.config.ts
-import { OazapftsExtensions } from "@tzkt/oazapfts/lib/codegen/extensions";
+import { OazapftsExtensions } from "@tzkt/oazapfts/codegen/extensions";
 
 const extensions: OazapftsExtensions = {
   extensionType1: [
@@ -113,7 +113,7 @@ If no method returns a non-nullish value, a schema will be processed by a defaul
 import {
   OazapftsExtensions,
   SchemaParserExtension,
-} from "@tzkt/oazapfts/lib/codegen/extensions";
+} from "@tzkt/oazapfts/codegen/extensions";
 import { factory } from "typescript";
 
 const myCustomSchemaParserExtension: SchemaParserExtension = (
@@ -162,7 +162,7 @@ Important thing to note here is if the parameter was processed by one of the met
 import {
   OazapftsExtensions,
   ParameterParserExtension,
-} from "@tzkt/oazapfts/lib/codegen/extensions";
+} from "@tzkt/oazapfts/codegen/extensions";
 import { factory } from "typescript";
 
 const myParameterParserExtension: ParameterParserExtension = (p, helpers) => {
@@ -204,7 +204,7 @@ This file is your collection of custom transformers that are, just like with [`o
 
 ```ts
 // queryParamParsers.ts
-import { QueryParamParser } from "@tzkt/oazapfts/lib/codegen/extensions";
+import { QueryParamParser } from "@tzkt/oazapfts/codegen/extensions";
 
 const myCustomParser1: QueryParamParser = (paramName, p?) => {
   // your custom parser logic
@@ -230,7 +230,7 @@ Why and when would this be useful? One example is when parameter types for your 
 import {
   OazapftsExtensions,
   QueryStringParserExtension,
-} from "@tzkt/oazapfts/lib/codegen/extensions";
+} from "@tzkt/oazapfts/codegen/extensions";
 import * as _ from "lodash";
 
 const myQueryStringParserExtension: QueryStringParserExtension = (p) => {
@@ -269,7 +269,7 @@ Now back to our example.
 
 ```ts
 // queryParamParsers.ts
-import { QueryParamParser } from "@tzkt/oazapfts/lib/codegen/extensions";
+import { QueryParamParser } from "@tzkt/oazapfts/codegen/extensions";
 
 const myCustomParser: QueryParamParser = (paramName, p?) => {
   if (!p) return {};
