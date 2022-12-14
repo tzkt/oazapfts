@@ -90,7 +90,8 @@ type SchemaParserExtensionHelpers = {
 export type SchemaParserExtension = (
   s: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject | undefined,
   name: string | undefined,
-  helpers: SchemaParserExtensionHelpers & typeof defaultHelpers
+  helpers: SchemaParserExtensionHelpers & typeof defaultHelpers,
+  ctx: ApiGenerator
 ) => ts.TypeNode | undefined;
 
 type ParameterParserExtensionHelpers = {
@@ -105,7 +106,8 @@ type ParameterParserExtensionHelpers = {
  */
 export type ParameterParserExtension = (
   p: OpenAPIV3.ParameterObject,
-  helpers: ParameterParserExtensionHelpers & typeof defaultHelpers
+  helpers: ParameterParserExtensionHelpers & typeof defaultHelpers,
+  ctx: ApiGenerator
 ) => ts.TypeNode | undefined;
 
 type ResolveHelpers = {
@@ -119,8 +121,19 @@ type ResolveHelpers = {
  */
 export type QueryStringParserExtension = (
   p: OpenAPIV3.ParameterObject,
-  helpers: ResolveHelpers & typeof defaultHelpers
+  helpers: ResolveHelpers & typeof defaultHelpers,
+  ctx: ApiGenerator
 ) => string | undefined;
+
+/**
+ * Returns the reponse type if passed responses meet custom logic.
+ * If a parameter should be processed with a default parser - return nothing.
+ */
+export type ReponseTypeExtension = (
+  responses: OpenAPIV3.ResponsesObject,
+  helpers: ResolveHelpers & typeof defaultHelpers,
+  ctx?: ApiGenerator
+) => "json" | "text" | "blob" | undefined;
 
 /**
  * Code generator extensions.
@@ -130,6 +143,7 @@ export type OazapftsExtensions = {
   queryStringParserExtensions?: QueryStringParserExtension[];
   parameterParserExtensions?: ParameterParserExtension[];
   schemaParserExtensions?: SchemaParserExtension[];
+  reponseTypeExtensions?: ReponseTypeExtension[];
 };
 
 /**

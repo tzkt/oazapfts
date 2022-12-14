@@ -196,6 +196,7 @@ export function createUrlExpression(path: string, qs?: ts.Expression) {
  */
 export const defaultHelpers = {
   isReference,
+  isNullable,
   ...cg,
 };
 
@@ -464,7 +465,7 @@ export default class ApiGenerator {
   ): ts.TypeNode {
     let type: ts.TypeNode | undefined;
 
-    // try applying custom extensions
+    // try to apply custom extensions
     const extensions = this.extensions.schemaParserExtensions;
     if (extensions && extensions.length > 0) {
       const extensionHelpers = {
@@ -472,7 +473,7 @@ export default class ApiGenerator {
         ...defaultHelpers,
       };
       for (let extension of extensions) {
-        type = extension(schema, name, extensionHelpers);
+        type = extension(schema, name, extensionHelpers, this);
         if (type) break;
       }
     }
@@ -710,6 +711,21 @@ export default class ApiGenerator {
   ): "json" | "text" | "blob" {
     // backwards-compatibility
     if (!responses) return "text";
+
+    const extensions = this.extensions.reponseTypeExtensions;
+    if (extensions && extensions.length > 0) {
+      for (let extension of extensions) {
+        const responseType = extension(
+          responses,
+          {
+            ...defaultHelpers,
+            defaultSchemaResolver: this.resolve.bind(this),
+          },
+          this
+        );
+        if (responseType) return responseType;
+      }
+    }
 
     const resolvedResponses = Object.values(responses).map((response) =>
       this.resolve(response)
@@ -1041,7 +1057,7 @@ export default class ApiGenerator {
                   ...defaultHelpers,
                 };
                 for (let extension of extensions) {
-                  const name = extension(p, helpers);
+                  const name = extension(p, helpers, this);
                   if (name) return name;
                 }
               };
